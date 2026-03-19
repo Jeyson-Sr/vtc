@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
 
 // --- TIPOS ---
 interface Insumo {
@@ -503,10 +504,25 @@ const VistaGenerarVTC: React.FC<VistaGenerarVTCProps> = ({ onBack, onNext, agreg
 // --- SUB-VISTA: RESUMEN VTC ---
 
 const VistaResumenVTC: React.FC<{ onBack: () => void; data: Insumo[] }> = ({ onBack, data }) => {
-  const enviarCorreo = () => {
+  
+ 
+  
+  const enviarCorreo = async (e: React.FormEvent) => {
     console.log('Enviando VTC por correo:', dataAgrupada);
     alert('VTC enviado por correo');
-    
+
+     e.preventDefault();
+
+    try {
+      const res = await axios.post("/contacto/enviar", {
+    productos: dataAgrupada // Ahora Laravel recibirá una llave llamada 'productos'
+});
+      alert(res.data.message);
+    } catch (error: any) {
+      console.log(error.response?.data);
+      alert("Error al enviar el correo");
+    }
+
   };
 
   // Agrupar por codAje: si hay duplicados, sumar sus cantidades
@@ -551,22 +567,11 @@ const VistaResumenVTC: React.FC<{ onBack: () => void; data: Insumo[] }> = ({ onB
             </thead>
             <tbody>
               {(() => {
-                // Helper to determine the product type for each item
-                const getTipo = (item: Insumo): 'Envasado' | 'Jarabe' | 'Auxiliar' => {
-                  if (DB_ENVASADO.some(p => p.insumos.some(i => i.codAje === item.codAje))) return 'Envasado';
-                  if (DB_JARABES.some(p => p.insumos.some(i => i.codAje === item.codAje))) return 'Jarabe';
-                  return 'Auxiliar';
-                };
-
-                // Sort grouped data: Envasado first, then Jarabe, then Auxiliar
-                const sorted = [...dataAgrupada].sort((a, b) => {
-                  const order: Record<string, number> = { Envasado: 1, Jarabe: 2, Auxiliar: 3 };
-                  return order[getTipo(a)] - order[getTipo(b)];
-                });
-
-                return sorted.map((item, idx) => {
-                  const isEnvasado = getTipo(item) === 'Envasado';
-                  const cantidad = isEnvasado ? item.cantidad / 0.997 : item.cantidad;
+                // Apply 0.997 factor only to "envasado" items
+                return dataAgrupada.map((item, idx) => {
+                  const cantidad = item.codEmb.startsWith('EMB-')
+                    ? parseFloat((item.cantidad / 0.997).toFixed(6))
+                    : item.cantidad;
                   return (
                     <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="px-3 py-2 text-gray-700 font-mono">{item.codAje}</td>
