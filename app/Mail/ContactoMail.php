@@ -15,7 +15,7 @@ class ContactoMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Nuevo mensaje de contacto')
+        return $this->subject('Nueva Solicitud VTC — Embotelladora Caral')
             ->view('emails.contacto');
     }
 }
