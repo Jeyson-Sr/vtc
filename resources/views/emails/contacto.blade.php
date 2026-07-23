@@ -194,7 +194,7 @@
                     <td class="code">{{ $producto['codEmb'] }}</td>
                     <td class="desc">{{ $producto['descripcion'] }}</td>
                     <td class="um">{{ $producto['um'] }}</td>
-                    <td class="qty">{{ number_format($producto['cantidad']) }}</td>
+                    <td class="qty">{{ number_format($producto['cantidad'], abs($producto['cantidad']) >= 1 || $producto['cantidad'] == 0 ? 0 : 6, '.', ',') }}</td>
                 </tr>
                 @endforeach
             </tbody>

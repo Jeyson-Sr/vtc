@@ -27,9 +27,13 @@ type Props = {
 };
 
 function formatQty(value: number): string {
-    return Math.round(value)
-        .toLocaleString('es-ES', { useGrouping: true })
-        .replace(/\./g, ',');
+    const decimals = Math.abs(value) >= 1 || value === 0 ? 0 : 6;
+    return value
+        .toLocaleString('es-PE', {
+            useGrouping: true,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: decimals,
+        });
 }
 
 export default function VtcIndex({ products, syrups }: Props) {
